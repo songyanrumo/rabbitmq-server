@@ -381,8 +381,8 @@ apply(#{index := _Idx} = Meta0, {_CmdTag, StreamId, #{}} = Cmd,
             return(Meta, State0, Reply, [])
     end;
 apply(Meta, {sac, SacCommand}, #?MODULE{single_active_consumer = SacState0} = State0) ->
-    {SacState1, Reply} = rabbit_stream_sac_coordinator:apply(SacCommand, SacState0),
-    return(Meta, State0#?MODULE{single_active_consumer = SacState1}, Reply, []);
+    {SacState1, Reply, Effects} = rabbit_stream_sac_coordinator:apply(SacCommand, SacState0),
+    return(Meta, State0#?MODULE{single_active_consumer = SacState1}, Reply, Effects);
 apply(Meta, {down, Pid, Reason} = Cmd,
       #?MODULE{streams = Streams0,
                listeners = Listeners0,
