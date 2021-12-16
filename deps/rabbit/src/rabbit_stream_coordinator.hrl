@@ -55,7 +55,7 @@
                 }).
 
 -record(?MODULE, {streams = #{} :: #{stream_id() => #stream{}},
-                  monitors = #{} :: #{pid() => {stream_id(), monitor_role()}},
+                  monitors = #{} :: #{pid() => {stream_id(), monitor_role()} | {pid(), sac}},
                   listeners = #{} :: #{stream_id() =>
                                        #{pid() := queue_ref()}},
                   single_active_consumer :: undefined | rabbit_stream_sac_coordinator:state(),
