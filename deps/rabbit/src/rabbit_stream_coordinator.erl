@@ -2,7 +2,7 @@
 %% License, v. 2.0. If a copy of the MPL was not distributed with this
 %% file, You can obtain one at https://mozilla.org/MPL/2.0/.
 %%
-%% Copyright (c) 2007-2021 VMware, Inc. or its affiliates.  All rights reserved.
+%% Copyright (c) 2007-2022 VMware, Inc. or its affiliates.  All rights reserved.
 %%
 
 -module(rabbit_stream_coordinator).
@@ -388,12 +388,10 @@ apply(#{index := _Idx} = Meta0, {_CmdTag, StreamId, #{}} = Cmd,
 apply(Meta, {sac, SacCommand}, #?MODULE{single_active_consumer = SacState0,
                                         monitors = Monitors0} = State0) ->
     {SacState1, Reply, Effects0} = rabbit_stream_sac_coordinator:apply(SacCommand, SacState0),
-    % {SacState2, Monitors1, Effects1} = 
-    %     rabbit_stream_sac_coordinator:ensure_monitors(SacCommand, SacState1, Monitors0, Effects0),
-    % return(Meta, State0#?MODULE{single_active_consumer = SacState2,
-    %                             monitors = Monitors1}, Reply, Effects1);
-    return(Meta, State0#?MODULE{single_active_consumer = SacState1,
-                                monitors = Monitors0}, Reply, Effects0);
+    {SacState2, Monitors1, Effects1} =
+         rabbit_stream_sac_coordinator:ensure_monitors(SacCommand, SacState1, Monitors0, Effects0),
+    return(Meta, State0#?MODULE{single_active_consumer = SacState2,
+                                 monitors = Monitors1}, Reply, Effects1);
 apply(Meta, {down, Pid, Reason} = Cmd,
       #?MODULE{streams = Streams0,
                listeners = Listeners0,
@@ -437,9 +435,9 @@ apply(Meta, {down, Pid, Reason} = Cmd,
                                                monitors = Monitors1}, ok, Effects0)
             end;
         {{Pid, sac}, Monitors1} ->
-            SacState1 = rabbit_stream_sac_coordinator:handle_connection_down(Pid, SacState0),
+            {SacState1, Effects} = rabbit_stream_sac_coordinator:handle_connection_down(Pid, SacState0),
             return(Meta, State#?MODULE{single_active_consumer = SacState1,
-                                       monitors = Monitors1}, ok, []);
+                                       monitors = Monitors1}, ok, Effects);
         error ->
             return(Meta, State, ok, Effects0)
     end;
