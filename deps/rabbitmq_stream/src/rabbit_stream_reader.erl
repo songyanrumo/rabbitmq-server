@@ -3200,6 +3200,8 @@ consumer_i(offset,
            #consumer{configuration =
                          #consumer_configuration{counters = Counters}}) ->
     consumer_offset(Counters);
+consumer_i(offset_lag, #consumer{log = undefined}) ->
+    0;
 consumer_i(offset_lag,
            #consumer{configuration =
                          #consumer_configuration{counters = Counters},
