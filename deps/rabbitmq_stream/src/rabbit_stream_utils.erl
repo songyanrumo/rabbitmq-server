@@ -11,7 +11,7 @@
 %% The Original Code is RabbitMQ.
 %%
 %% The Initial Developer of the Original Code is Pivotal Software, Inc.
-%% Copyright (c) 2020-2021 VMware, Inc. or its affiliates.  All rights reserved.
+%% Copyright (c) 2020-2022 VMware, Inc. or its affiliates.  All rights reserved.
 %%
 
 -module(rabbit_stream_utils).
@@ -243,5 +243,4 @@ strip_cr_lf(NameBin) ->
     binary:replace(NameBin, [<<"\n">>, <<"\r">>], <<"">>, [global]).
 
 is_sac_ff_enabled() ->
-    FeatureFlagsEnabled = rabbit_ff_registry:list(enabled),
-    maps:is_key(stream_single_active_consumer, FeatureFlagsEnabled).
+    rabbit_feature_flags:is_enabled(stream_single_active_consumer).
