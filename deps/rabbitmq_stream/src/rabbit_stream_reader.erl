@@ -1987,9 +1987,22 @@ handle_frame_post_auth(Transport,
                            Connection,
                        #stream_connection_state{consumers = Consumers} = State,
                        {credit, SubscriptionId, Credit}) ->
-    %% FIXME check consumer is active
-    %% if not active, don't dispatch, just return appropriate response
     case Consumers of
+        #{SubscriptionId := #consumer{log = undefined}} ->
+            %% the consumer is not active, it's likely to be credit leftovers
+            %% from a formerly active consumer, just logging and send an error
+            rabbit_log:debug("Giving credit to an inactive consumer: ~p",
+                             [SubscriptionId]),
+
+            Code = ?RESPONSE_CODE_PRECONDITION_FAILED,
+            Frame =
+                rabbit_stream_core:frame({response, 1,
+                                          {credit, Code, SubscriptionId}}),
+            send(Transport, S, Frame),
+            rabbit_global_counters:increase_protocol_counter(stream,
+                                                             ?PRECONDITION_FAILED,
+                                                             1),
+            {Connection, State};
         #{SubscriptionId := Consumer} ->
             #consumer{credit = AvailableCredit} = Consumer,
             case send_chunks(Transport,
@@ -3261,7 +3274,6 @@ consumer_i(activity_status,
     rabbit_stream_utils:consumer_activity_status(Active, Properties);
 consumer_i(_Unknown, _) ->
     ?UNKNOWN_FIELD.
-
 
 publishers_info(Pid, InfoItems) ->
     gen_server2:call(Pid, {publishers_info, InfoItems}).
