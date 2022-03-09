@@ -16,7 +16,7 @@ define PROJECT_APP_EXTRA_KEYS
 	{licenses, ["MPL 2.0"]},
 	{links, [
 	    {"Website", "https://www.rabbitmq.com/"},
-	    {"GitHub", "https://github.com/rabbitmq/rabbitmq-erlang-client"},
+	    {"GitHub", "https://github.com/rabbitmq/rabbitmq-server/deps/amqp_client"},
 	    {"User guide", "https://www.rabbitmq.com/erlang-client-user-guide.html"}
 	  ]},
 	{build_tools, ["make", "rebar3"]},
